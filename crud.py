@@ -1,12 +1,6 @@
-import mysql.connector
 from modelos import Aluno, Plano, Instrutor
 from abc import ABC, abstractmethod
-conexao = mysql.connector.connect(
-    host='localhost',
-    user='root',
-    password='Mned2003@',
-    database='bdacademia',
-)
+
 class Gerenciador(ABC):
     @abstractmethod
     def adicionando(self):
@@ -111,6 +105,3 @@ class GerenciadorPlano(Gerenciador):
         comando = f'UPDATE plano SET {campo} = %s WHERE nome_plano = %s'
         self.cursor.execute(comando, (valor_alterado, nome))
         self.conexao.commit()
-    
-
-conexao.close()
