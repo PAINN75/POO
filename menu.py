@@ -1,7 +1,7 @@
 import mysql.connector
 from modelos import Aluno, Plano, Instrutor
 from crud  import GerenciadorAluno, GerenciadorPlano, GerenciadorInstrutor
-from abc import ABC, abstractmethod
+
 conexao = mysql.connector.connect(
     host='localhost',
     user='root',
@@ -33,20 +33,38 @@ while True:
                 1- Adicionar
                 2- Listar
                 3- Remover
-                4- Altualizar      
+                4- Altualizar
+                5- Contratar Personal    
                 0- Sair            
                 """)
                 op = input()
                 match op:
                     case "1":
-                        nome = input("Digite o nome do aluno que deseja adicionar!")
-                        email = input("Digite o E-mail do aluno!")
-                        telefone = input("Digite o Telefone do aluno!")
-                        cpf = input("Digite o CPF do aluno!")
+                        nome = input("Digite o nome do aluno que deseja adicionar!").strip()
+                        if not nome:
+                            print("Erro: nome não pode ser vazio!")
+                            continue
+                        cpf = input("Digite o CPF do aluno!").strip()
+                        if not cpf.isdigit() or len(cpf) != 11:
+                            print("Erro: CPF inválido Digite 11 números sem pontos ou traços.")
+                            continue
+                        email = input("Digite o E-mail do aluno!").strip()
+                        if "@" not in email or "." not in email:
+                            print("Erro: E-mail invalido!")
+                            continue
+                        telefone = input("Digite o Telefone do aluno!").strip()
+                        if not telefone.isdigit() or len(telefone) not in [10, 11]:
+                            print("Erro: telefone invalido, Digite 10 ou 11 números.")
+                            continue
                         print("Escolha um plano:")
                         ger_plano.listando()
-                        id_plano = int(input("Digite o id do plano que você quer!"))
-                        ger_aluno.adicionando(nome, email, telefone, cpf, id_plano)
+                        id_plano = input("Digite o id do plano que você quer!").strip()
+                        if not id_plano.isdigit():
+                            print("Erro: ID inválido!")
+                            continue
+                        id_plano = int(id_plano)
+                        aluno = Aluno(nome, cpf, email, telefone, id_plano)
+                        ger_aluno.adicionando(aluno)
                         print("Aluno adicionado!")
                     case "2":
                         ger_aluno.listando()
@@ -76,6 +94,20 @@ while True:
                             ger_aluno.alterando(nome, campo, valor_alterado)
                         else:
                             print("Opção invalida")
+                    case "5":
+                        nome_aluno = input("Digite o nome do aluno: ").strip()
+                        if not nome_aluno:
+                            print("Erro: nome não pode ser vazio!")
+                            continue
+                        print("Instrutores disponiveis: ")
+                        ger_instrutor.listando()
+                        id_instrutor = input("Digite o ID do Instrutor: ")
+                        if not id_instrutor.isdigit():
+                            print("Erro: ID inválido!")
+                            continue
+                        id_instrutor = int(id_instrutor)
+                        ger_aluno. alterando(nome_aluno, "id_instrutor", id_instrutor)
+                        print("Personal contratado!")
                     case "0":
                         break
                     case _:
@@ -94,17 +126,29 @@ while True:
                 op = input()
                 match op:
                     case "1":
-                        nome = input("Digite o nome do Instrutor que deseja adicionar!")
-                        email = input("Digite o E-mail do instrutor!")
-                        telefone = input("Digite o Telefone do instrutor!")
-                        cpf = input("Digite o CPF do instrutor!")
-                        especialidade = input("Digite a especialidade do instrutor")
-                        ger_instrutor.adicionando(nome, cpf, email, telefone, especialidade)
+                        nome = input("Digite o nome do Instrutor que deseja adicionar!").strip()
+                        if not nome:
+                            print("Erro: nome não pode ser vazio!")
+                            continue
+                        cpf = input("Digite o CPF do Instrutor!").strip()
+                        if not cpf.isdigit() or len(cpf) != 11:
+                            print("Erro: CPF inválido Digite 11 números sem pontos ou traços.")
+                            continue
+                        email = input("Digite o E-mail do Instrutor!").strip()
+                        if "@" not in email or "." not in email:
+                            print("Erro: E-mail invalido!")
+                            continue
+                        telefone = input("Digite o Telefone do Instrutor!").strip()
+                        if not telefone.isdigit() or len(telefone) not in [10, 11]:
+                            print("Erro: telefone invalido, Digite 10 ou 11 números.")
+                            continue
+                        instrutor = Instrutor(nome, cpf, email, telefone)
+                        ger_instrutor.adicionando(instrutor)
                         print("Instrutor adicionado!")
                     case "2":
                         ger_instrutor.listando()
                     case "3":
-                        name = input("Digite o nome do Instrutor que você deseja excluir!")
+                        name = input("Digite o nome do Instrutor que você deseja excluir!").strip()
                         ger_instrutor.limpando(name)
                         print("Instrutor excluido!")
                     case "4":
@@ -112,8 +156,7 @@ while True:
                             "1": "nome_instrutor",
                             "2": "cpf_instrutor",
                             "3": "email_instrutor",
-                            "4": "telefone_instrutor",
-                            "5": "especialidade"
+                            "4": "telefone_instrutor"
                         }
                         nome = input("Digite o nome do Instrutor que deseja alterar")
                         print("""
@@ -121,7 +164,6 @@ while True:
                         2 - Email
                         3 - CPF      
                         4 - Telefone
-                        5 - Especialidade
                         """)
                         opcao = input("Escolha o campo: ")
                         if opcao in campos_validos:
@@ -149,11 +191,19 @@ while True:
                 op = input()
                 match op:
                     case "1":
-                        nome = input("Digite o nome do Instrutor que deseja adicionar!")
-                        preco = input("Digite o E-mail do instrutor!")
-                        vantagens = input("Digite o Telefone do instrutor!")
-                        desvantagens = input("Digite o CPF do instrutor!")    
-                        ger_instrutor.adicionando(nome, preco, vantagens, desvantagens)
+                        nome = input("Digite o nome do Plano que deseja adicionar!").strip()
+                        if not nome:
+                            print("Erro: nome não pode ser vazio!")
+                            continue
+                        preco = input("Digite o preço: ").strip().replace(",", ".")
+                        if not preco.replace(".", "").isdigit():
+                            print("Erro: preço inválido!")
+                            continue
+                        preco = float(preco) 
+                        vantagens = input("Digite a vantagens!").strip()
+                        desvantagens = input("Digite a desvantagens!").strip()
+                        plano = Plano(nome, preco, vantagens, desvantagens) 
+                        ger_plano.adicionando(plano)
                         print("Plano adicionado!")
                     case "2":
                         ger_plano.listando()
@@ -186,7 +236,7 @@ while True:
                     case "0":
                         break
                     case _:
-                       print("Opção invalida!") 
+                       print("Opção invalida!")
         case "0":
             break
         case _:

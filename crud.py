@@ -2,6 +2,9 @@ from modelos import Aluno, Plano, Instrutor
 from abc import ABC, abstractmethod
 
 class Gerenciador(ABC):
+    def __init__(self, conexao):
+        self.conexao = conexao
+        self.cursor = conexao.cursor()
     @abstractmethod
     def adicionando(self):
         pass
@@ -17,26 +20,22 @@ class Gerenciador(ABC):
 
 class GerenciadorAluno(Gerenciador):
     def __init__(self, conexao):
-        self.conexao = conexao
-        self.cursor = conexao.cursor()
-    def adicionando(self, nome_aluno, email_aluno, telefone_aluno, cpf_aluno, id_plano):
-        comando = 'INSERT INTO aluno (nome_aluno, email_aluno, telefone_aluno, cpf_aluno, id_plano) VALUES (%s, %s, %s, %s, %s)'
-        self.cursor.execute(comando, (nome_aluno, email_aluno, telefone_aluno, cpf_aluno, id_plano))
+        super().__init__(conexao)
+    def adicionando(self, aluno):
+        comando = 'INSERT INTO aluno (nome_aluno, cpf_aluno, email_aluno, telefone_aluno, id_plano, id_instrutor) VALUES (%s, %s, %s, %s, %s, %s)'
+        valores = (aluno.nome, aluno.cpf, aluno.email, aluno.telefone, aluno.id_plano, aluno.id_instrutor)
+        self.cursor.execute(comando, valores)
         self.conexao.commit()
     def listando(self):
         comando = 'SELECT * FROM aluno'
         self.cursor.execute(comando)
         resultado = self.cursor.fetchall() # ler o banco de dados
+        if not resultado:
+            print("Nenhum aluno cadastrado")
+            return
         for aluno in resultado:
-            print(f"""
-            ID: {aluno[0]}
-            Nome: {aluno[1]}
-            CPF: {aluno[2]}
-            E-mail: {aluno[3]}
-            Telefone: {aluno[4]}
-            Plano ID: {aluno[5]}
-            """)
-    
+            obj = Aluno(aluno[1],  aluno[2], aluno[3], aluno[4], aluno[5])
+            print(obj)
     def limpando(self, nome_aluno):
         comando = 'DELETE FROM aluno WHERE nome_aluno = %s'
         self.cursor.execute(comando, (nome_aluno,))
@@ -48,25 +47,22 @@ class GerenciadorAluno(Gerenciador):
 
 class GerenciadorInstrutor(Gerenciador):
     def __init__(self, conexao):
-        self.conexao = conexao
-        self.cursor = conexao.cursor()
-    def adicionando(self, nome_instrutor, cpf_instrutor ,email_instrutor, telefone_instrutor, especialidade):
-        comando = 'INSERT INTO instrutor (nome_instrutor, cpf_instrutor ,email_instrutor, telefone_instrutor, especialidade) VALUES (%s, %s, %s, %s, %s)'
-        self.cursor.execute(comando, (nome_instrutor, cpf_instrutor ,email_instrutor, telefone_instrutor, especialidade))
+        super().__init__(conexao)
+    def adicionando(self, instrutor):
+        comando = 'INSERT INTO instrutor (nome_instrutor, cpf_instrutor ,email_instrutor, telefone_instrutor) VALUES (%s, %s, %s, %s)'
+        valores = (instrutor.nome, instrutor.cpf, instrutor.email, instrutor.telefone)
+        self.cursor.execute(comando, valores)
         self.conexao.commit()
     def listando(self):
         comando = 'SELECT * FROM instrutor'
         self.cursor.execute(comando)
         resultado = self.cursor.fetchall() # ler o banco de dados
+        if not resultado:
+            print("Nenhum Instrutor encontrado!")
+            return
         for instrutor in resultado:
-            print(f"""
-            ID: {instrutor[0]}
-            Nome: {instrutor[1]}
-            CPF: {instrutor[2]}
-            E-mail: {instrutor[3]}
-            Telefone: {instrutor[4]}
-            Especialidade: {instrutor[5]}
-            """)
+            obj = Instrutor(instrutor[1], instrutor[2], instrutor[3], instrutor[4])
+            print(obj)
     
     def limpando(self, nome_instrutor):
         comando = 'DELETE FROM instrutor WHERE nome_instrutor = %s'
@@ -79,24 +75,22 @@ class GerenciadorInstrutor(Gerenciador):
 
 class GerenciadorPlano(Gerenciador):
     def __init__(self, conexao):
-        self.conexao = conexao
-        self.cursor = conexao.cursor()
-    def adicionando(self, nome_plano, preco_plano, vantagens, desvantagens):
+        super().__init__(conexao)
+    def adicionando(self, plano):
         comando = 'INSERT INTO plano (nome_plano,  preco_plano, vantagens, desvantagens) VALUES (%s, %s, %s, %s)'
-        self.cursor.execute(comando, (nome_plano, preco_plano, vantagens, desvantagens))
+        valores = (plano.nome, plano.preco, plano.vantagens, plano.desvantagens)
+        self.cursor.execute(comando, valores)
         self.conexao.commit()
     def listando(self):
         comando = 'SELECT * FROM plano'
         self.cursor.execute(comando)
         resultado = self.cursor.fetchall() # ler o banco de dados
+        if not resultado:
+            print("Nenhum Plano encontrado!")
+            return
         for plano in resultado:
-            print(f"""
-            ID: {plano[0]}
-            Nome: {plano[1]}
-            Preço: {plano[2]}
-            Vantagens: {plano[3]}
-            Desvantagens: {plano[4]}
-            """)
+            obj = Plano(plano[1], plano[2], plano[3], plano[4])
+            print(obj)
     def limpando(self, nome_plano):
         comando = 'DELETE FROM plano WHERE nome_plano = %s'
         self.cursor.execute(comando, (nome_plano,))
